@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "baby-llama",
+    "slug": "baby-llama",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Baby Llama needs access to your Camera."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "android.permission.CAMERA"
+      ],
+      "package": "com.alinaerf.babyllama"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Baby Llama to access your camera",
+          "microphonePermission": "Allow Baby Llama to access your microphone",
+          "recordAudioAndroid": true
+        }
+      ], 
+      ["expo-av"
+    ]
+    ]
+  }
+}
