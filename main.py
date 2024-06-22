@@ -133,7 +133,7 @@ if __name__ == "__main__":
 
 """
 
-
+"""
 from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 import os
@@ -237,4 +237,34 @@ if __name__ == "__main__":
     from flask_cors import CORS
     CORS(app)  # Enables CORS for all domains, adjust as necessary for production
     app.run(debug=True, port=5000)
+"""
 
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import datetime
+
+app = Flask(__name__)
+CORS(app)
+
+@app.route('/upload-text', methods=['POST'])
+def upload_text():
+    text = request.form['text']
+    processed_text = text.upper()  # Example of processing: converting text to uppercase
+    return jsonify({
+        'message': 'Text processed successfully',
+        'processedText': processed_text
+    })
+
+@app.route('/upload-audio', methods=['POST'])
+def upload_audio():
+    audio = request.files['audio']
+    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    audio_filename = f"audio_{timestamp}.mp3"
+    audio.save(audio_filename)
+    return jsonify({
+        'message': 'Audio processed successfully',
+        'audioFile': audio_filename
+    })
+
+if __name__ == '__main__':
+    app.run(debug=True)
