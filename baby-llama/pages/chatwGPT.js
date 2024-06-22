@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, TextInput, FlatList, StyleSheet } from 'react-native';
 import { Audio } from 'expo-av';
-// import axios from 'axios';
+import ky from 'ky';
+
 
 const ChatScreen = () => {
   const [messages, setMessages] = useState([]);
@@ -38,33 +39,35 @@ const ChatScreen = () => {
     await recording.stopAndUnloadAsync();
     const uri = recording.getURI();
     setRecordingUri(uri);
-
-    // Upload the audio
     uploadRecording(uri);
   };
 
   const uploadRecording = async (uri) => {
     const formData = new FormData();
-    formData.append('audio', {
+    formData.append("audio", {
       uri,
-      type: 'audio/x-m4a',
+      type: `audio.m4a`,
       name: 'recording.m4a',
+    }
+    )
+    try {
+      const response= await ky.post("http://10.56.193.152:5000/upload-audio", {
+      body: formData,
     });
+      if (!response.ok) {
+        throw new Error('Failed to upload file');
+      }
 
-    // try {
-    //   const response = await axios.post('http://127.0.0.1:5000/upload', formData, {
-    //     headers: {
-    //       'Content-Type': 'multipart/form-data',
-    //     },
-    //   });
-
-    //   if (response.status === 200) {
-    //     const chatResponse = await axios.get('http://127.0.0.1:5000/get-response');
-    //     setMessages([...messages, { type: 'user', content: 'Audio message' }, { type: 'bot', content: chatResponse.data.message }]);
-    //   }
-    // } catch (error) {
-    //   console.error('Failed to upload file or get response', error);
-    // }
+      const data = await response.json();
+      console.log('Server response:', data);
+      // if (response.status === 200) {
+      //   console.log("success")
+      //   // const chatResponse = await axios.get('http://127.0.0.1:5000/get-response');
+      //   // setMessages([...messages, { type: 'user', content: 'Audio message' }, { type: 'bot', content: chatResponse.data.message }]);
+      // }
+    } catch (error) {
+      console.error('Failed to upload file or get response', error);
+    }
   };
 
   return (
