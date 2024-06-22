@@ -241,15 +241,20 @@ if __name__ == "__main__":
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import datetime
+import os
+from datetime import datetime
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 CORS(app)
 
+UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 @app.route('/upload-text', methods=['POST'])
 def upload_text():
-    text = request.form['text']
-    processed_text = text.upper()  # Example of processing: converting text to uppercase
+    data = request.get_json()
+    processed_text = data['text'].upper()  # Example of processing: converting text to uppercase
     return jsonify({
         'message': 'Text processed successfully',
         'processedText': processed_text
@@ -257,14 +262,23 @@ def upload_text():
 
 @app.route('/upload-audio', methods=['POST'])
 def upload_audio():
+    if 'audio' not in request.files:
+        return jsonify({'message': 'No audio file provided'}), 400
+
     audio = request.files['audio']
-    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    audio_filename = f"audio_{timestamp}.mp3"
-    audio.save(audio_filename)
-    return jsonify({
-        'message': 'Audio processed successfully',
-        'audioFile': audio_filename
-    })
+    if audio.filename == '':
+        return jsonify({'message': 'No selected file'}), 400
+
+    if audio:
+        filename = secure_filename(audio.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        audio.save(filepath)
+        return jsonify({
+            'message': 'Audio processed successfully',
+            'audioFile': filename
+        })
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.makedirs(UPLOAD_FOLDER)
+    app.run(debug=True, host='0.0.0.0')
