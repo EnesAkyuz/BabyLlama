@@ -1,8 +1,8 @@
 import {View, Text, SafeAreaView} from 'react-native';
-export default function JournalScreen({ navigation }) {
+export default function SurveyScreen({ navigation }) {
     return (
         <SafeAreaView>
-            <Text> Journal Screen</Text>
+            <Text> Survey Screen</Text>
         </SafeAreaView>
     )
 }

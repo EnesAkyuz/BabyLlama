@@ -1,0 +1,12 @@
+[
+    {
+        "id":1,
+        "description": "Mommy logged 2h 15m of sleep time.",
+        "date": "06-22"
+    }, 
+    {
+        "id":2,
+        "description":"Daddy logged 2h 15m of sleep time.", 
+        "date": "06-21"
+    } 
+]
