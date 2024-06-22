@@ -2,15 +2,14 @@ import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import DashboardScreen from './pages/dashboard';
-import JournalScreen from './pages/journal';
-import BabyScreen from './pages/baby';
-
+import DashboardNav from './navigation/dashboardNav';
+import ParentNav from './navigation/parentNav';
+import BabyNav from './navigation/babyNav';
 
 export default function App() {
   const Tab = createBottomTabNavigator();
   const dashboardName = "Dashboard";
-  const journalName = "Journal";
+  const parentName = "Parent";
   const babyName = 'Baby';
 
   return (
@@ -25,7 +24,7 @@ export default function App() {
             if (rn === dashboardName) {
               iconName = focused ? 'home' : 'home-outline';
 
-            } else if (rn === journalName) {
+            } else if (rn === parentName) {
               iconName = focused ? 'book' : 'book-outline';
             } else if (rn === babyName) {
               iconName=focused?'body' : 'body-outline'
@@ -47,9 +46,9 @@ export default function App() {
           headerShown:false,
         })}>
 
-        <Tab.Screen name={dashboardName} component={DashboardScreen} />
-        <Tab.Screen name={babyName} component={BabyScreen} />
-        <Tab.Screen name={journalName} component={JournalScreen} />
+        <Tab.Screen name={dashboardName} component={DashboardNav} />
+        <Tab.Screen name={babyName} component={BabyNav} />
+        <Tab.Screen name={parentName} component={ParentNav} />
       </Tab.Navigator>
     </NavigationContainer>
   );

@@ -15,6 +15,7 @@ export default function BabyScreen({ navigation }) {
     const [openCamera, setOpenCamera] = useState(false);
     const [permission, requestPermission] = useCameraPermissions();
     const [recording, setRecording] = useState();
+    const [recordingUri, setRecordingUri] = useState(null);
     const [permissionResponse, requestPermissionResponse] = Audio.usePermissions();
 
     if (!permission || !permissionResponse) {
