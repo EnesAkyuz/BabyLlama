@@ -260,7 +260,9 @@ UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Initialize the OpenAI client and chat history
-chat_history = []
+chat_history = [
+    {"role": "system", "content":"You are an assistant for new parents, do not use any possibly triggering answers. Be sure that your answers are short, easily digestable, understandable and do not cause panic. Always stay very calm and empathetic. Be knowledgeable and assuring. Do not write long essays of answers, try to be readably short."}
+]
 client = OpenAI()
 MODEL = 'gpt-3.5-turbo'
 
@@ -293,6 +295,7 @@ def upload_text():
         'message': 'Text processed successfully',
         'processedText': processed_text
     })
+
 
 @app.route('/upload-audio', methods=['POST'])
 def upload_audio():
@@ -330,7 +333,8 @@ def upload_audio():
         })
 
 
-@app.route('/upload-audio2', methods=['POST'])
+"""
+@app.route('/upload-amazing', methods=['POST'])
 def upload_audio():
     if 'audio' not in request.files:
         return jsonify({'message': 'No audio file provided'}), 400
@@ -348,9 +352,9 @@ def upload_audio():
             'audioFile': filename
         })
 
-
+"""
 
 if __name__ == '__main__':
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True)
