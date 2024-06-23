@@ -8,6 +8,14 @@
 
 **Welcome to our family friendly repository for BabyLlama! Built entirely at Berkeley AI Hackathon by [Enes Akyuz](https://github.com/EnesAkyuz), Eylül Yıldırım, [Alina Erofeeva](https://github.com/alinaerf). Give us a visit if you can!**
 
+### Application Screenshots
+<p align="center">
+    <img src="https://github.com/EnesAkyuz/BabyLlama/assets/90750587/b2c36034-fbc8-4ae3-a9a4-339855a81bbb" alt="Final Logo" width="200">
+    <img src="https://github.com/EnesAkyuz/BabyLlama/assets/90750587/3dc833a6-ff95-4150-b32d-53a6181e48ce" alt="Final Logo" width="200">
+    <img src="https://github.com/EnesAkyuz/BabyLlama/assets/90750587/b98967b0-e9e5-4564-8061-0e141f3d0f79" alt="Final Logo" width="200">
+</p>
+
+
 ### What it does
 The mobile application has multiple features ranging from menial tasks to AI-supported creative tasks:
 
