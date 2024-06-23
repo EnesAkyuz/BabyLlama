@@ -253,6 +253,10 @@ from openai import OpenAI, AsyncOpenAI, audio
 from pydub import AudioSegment
 from pathlib import Path
 
+# lmnt stuff
+import requests
+from lmnt.api import Speech
+
 app = Flask(__name__)
 CORS(app)
 
@@ -295,7 +299,6 @@ def upload_text():
         'message': 'Text processed successfully',
         'processedText': processed_text
     })
-
 
 @app.route('/upload-audio', methods=['POST'])
 def upload_audio():
@@ -358,12 +361,12 @@ def upload_audio():
             for chunk in response.iter_bytes():
                 f.write(chunk)
         
-        print(str(speech_file_path))
+
         return jsonify({
             'message': 'Audio processed successfully',
-            'processedText':str(chat_history[-1]['content']),
+            'processedText': str(chat_history[-1]['content']),
             'audioFile': str(speech_file_path),
-            'userInput':str(chat_history[-2]['content'])
+            'userInput': str(chat_history[-2]['content'])
         })
 
 def get_ip_address():
@@ -378,6 +381,52 @@ def get_ip_address():
     finally:
         s.close()
     return ip
+
+@app.route('/lmnt-call', methods=['POST'])
+def lmnt_call():
+
+    LMNT_API_KEY = os.getenv('LMNT_API_KEY')
+
+    audio_file = request.files['audio']
+
+    # 1. Upload audio to LMNT for voice cloning
+    lmnt_response = requests.post(
+        'https://api.lmnt.com/v1/voice-clone',
+        headers={'Authorization': f'Bearer {LMNT_API_KEY}'},
+        files={'audio': audio_file}
+    )
+    lmnt_data = lmnt_response.json()
+    cloned_voice_url = lmnt_data['cloned_voice_url']  # Assume this is the URL of the cloned voice
+
+    # 2. Generate content with ChatGPT
+    stream = client.chat.completions.create(
+        model=MODEL,
+        messages=[{"role": "system", "content": "Create a bedtime story"}],
+        stream=True,
+        max_tokens=1000
+    )
+
+    story_text = ''
+    for chunk in stream:
+        if chunk.choices[0].delta.content is not None:
+            story_text += chunk.choices[0].delta.content
+
+    # 3. Synthesize the story using the cloned voice
+    synthesis_response = requests.post(
+        'https://api.lmnt.com/v1/synthesize',
+        headers={'Authorization': f'Bearer {LMNT_API_KEY}'},
+        json={
+            'voice_url': cloned_voice_url,
+            'text': story_text
+        }
+    )
+    synthesized_story_url = synthesis_response.json()['synthesized_audio_url']
+
+    return jsonify({
+        'story_text': story_text,
+        'synthesized_story_url': synthesized_story_url
+    })
+
 
 
 if __name__ == '__main__':
