@@ -133,7 +133,7 @@ const ChatScreen = () => {
         </TouchableOpacity>
       </View>
       <View style={styles.row}>
-        <TouchableOpacity onPress={() => handlePress('image5')}>
+        <TouchableOpacity onPress={() => youCom()}>
           <Image source={articles} style={styles.image} />
         </TouchableOpacity>
         {/* <View style={styles.placeholder} />  Placeholder for the empty spot */}
@@ -143,22 +143,6 @@ const ChatScreen = () => {
   }
 
    async function playSound() {
-//     const sourceFilePath='C:/Users/UserHome/Desktop/UCB hackathon/BabyLlama/outputs/speech.mp3'
-//  // Destination directory in the device's cache directory
-//     const cacheDirectory = FileSystem.cacheDirectory + 'audio.mp3';
-
-//     // Get the absolute path for the source file
-//     const absoluteSourcePath = sourceFilePath;
-//     // Copy the file from the source to the destination
-//     await FileSystem.copyAsync({
-//       from: absoluteSourcePath,
-//       to: cacheDirectory,
-//     });
-
-//      const { sound } = await Audio.Sound.createAsync({ uri: cacheDirectory })
-//       setSound(sound);
-//       console.log('Playing Sound');
-     //       await sound.playAsync();
      try {
     // Load the MP3 file from assets (adjust the path as per your project structure)
     const asset = Asset.fromModule(require('../assets/speech.mp3'));
@@ -182,6 +166,21 @@ const ChatScreen = () => {
   } catch (error) {
     console.error('Error playing local audio:', error);
   }
+  }
+  const youCom = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post("http://10.56.193.152:5000/you-com-call", );
+      const userMessage={type:'user', content:"Articles about parenthood and children!"}
+      const results = response.data.slice(0,5)
+      const formattedList = results.map(item => `- ${item.title} via ${item.url}`).join('\n');
+      const newMessage = { type:'bot',content: formattedList }
+      setMessages([...messages, userMessage, newMessage])
+    } catch (error) {
+      console.error('Failed to upload file or get response', error);
+    } finally {
+      setLoading(false);
+    }
   }
   // useEffect(() => {
   //   return sound

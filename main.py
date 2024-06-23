@@ -446,7 +446,7 @@ def you_com_call():
         return jsonify({"error": "You.com API key is missing"}), 500
 
     # Get the query from the POST request data
-    data = request.json
+    # data = request.json
     chat = ". ".join([d.get("content", "") for d in chat_history]).strip()
     query = chat or "baby-care" # Default to "baby-care" if no query is provided
 
@@ -466,7 +466,7 @@ def you_com_call():
     )
 
     if response.status_code == 200:
-        articles = response.json().get('articles', [])
+        articles = response.json().get('hits', [])
         # Extract URLs and titles
         results = [{"title": article.get('title'), "url": article.get('url')} for article in articles]
         return jsonify(results)
