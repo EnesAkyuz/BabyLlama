@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, TextInput, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Button, TextInput, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
 import { Audio } from 'expo-av';
 import ky from 'ky';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -10,6 +10,7 @@ const ChatScreen = () => {
   const [recording, setRecording] = useState(null);
   const [recordingUri, setRecordingUri] = useState(null);
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -45,14 +46,20 @@ const ChatScreen = () => {
   };
 
   const uploadText = async () => {
+    setLoading(true);
     const formData = new FormData();
     formData.append("text", input)
     try {
       const response = await axios.post("http://10.56.193.152:5000/upload-text", { text: input });
-      // console.log(response["processedText"])
+      const userMessage={type:'user', content:input}
       console.log(response.data.processedText)
+      const newMessage = { type:'bot',content: response.data.processedText }
+      setMessages([...messages, userMessage, newMessage])
+      setInput("");
     } catch (error) {
       console.error('Failed to upload file or get response', error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -72,9 +79,8 @@ const ChatScreen = () => {
         throw new Error('Failed to upload file');
       }
 
-      const data = await response.json();
-      console.log('Server response:', data);
-      setInput("");
+      // const data = await response;
+      console.log('Server response:', response);
       // if (response.status === 200) {
       //   console.log("success")
       //   // const chatResponse = await axios.get('http://127.0.0.1:5000/get-response');
@@ -86,23 +92,18 @@ const ChatScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={messages}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View style={[styles.message, item.type === 'user' ? styles.userMessage : styles.botMessage]}>
-            <Text>{item.content}</Text>
-          </View>
-        )}
-      />
-      {/* <Button
-        title={recording ? 'Stop Recording' : 'Start Recording'}
-        onPress={recording ? stopRecording : startRecording}
-        style={styles.recordButton}>
-      < MaterialCommunityIcons name='microphone' size={30} color={'black'} />
-      </Button> */}
-
+    <SafeAreaView style={styles.container}>
+      {loading ? <ActivityIndicator size='large'/>
+        :
+        <FlatList
+      data={messages}
+      keyExtractor={(item, index) => index.toString()}
+      renderItem={({ item }) => (
+        <View style={[styles.message, item.type === 'user' ? styles.userMessage : styles.botMessage]}>
+          <Text>{item.content}</Text>
+        </View>
+      )}
+    />}
        <View style={{flexDirection:'row',  alignItems: 'center',justifyContent: 'flex-end',paddingHorizontal: 10, gap:20}}>
         <TextInput
           value={input}
@@ -119,14 +120,14 @@ const ChatScreen = () => {
         }
         
         </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
   },
   message: {
     padding: 10,
@@ -135,11 +136,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   userMessage: {
-    backgroundColor: '#d1e7dd',
+    backgroundColor: 'lightblue',
     alignSelf: 'flex-end',
   },
   botMessage: {
-    backgroundColor: '#f8d7da',
+    backgroundColor: 'lightgray',
     alignSelf: 'flex-start',
   },
   recordButton: {
