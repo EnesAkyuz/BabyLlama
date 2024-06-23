@@ -427,6 +427,39 @@ def lmnt_call():
         'synthesized_story_url': synthesized_story_url
     })
 
+@app.route('/you-com-call', methods=['POST'])
+def you_com_call():
+    YOU_API_KEY = os.getenv('YOU_API_KEY')
+    if not YOU_API_KEY:
+        return jsonify({"error": "You.com API key is missing"}), 500
+
+    # Get the query from the POST request data
+    data = request.json
+    chat = ". ".join([d.get("content", "") for d in chat_history]).strip()
+    query = chat or "baby-care" # Default to "baby-care" if no query is provided
+
+    headers = {
+        "X-API-Key": YOU_API_KEY
+    }
+
+    params = {
+        "query": query
+    }
+
+    # Make the request to You.com API
+    response = requests.get(
+        f"https://api.ydc-index.io/search",
+        params=params,
+        headers=headers
+    )
+
+    if response.status_code == 200:
+        articles = response.json().get('articles', [])
+        # Extract URLs and titles
+        results = [{"title": article.get('title'), "url": article.get('url')} for article in articles]
+        return jsonify(results)
+    else:
+        return jsonify({"error": "Failed to fetch articles from You.com"}), response.status_code
 
 
 if __name__ == '__main__':
