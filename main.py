@@ -257,6 +257,12 @@ from pathlib import Path
 import requests
 from lmnt.api import Speech
 
+# hume stuff
+from hume import HumeBatchClient
+from hume.models.config import FaceConfig
+
+
+
 app = Flask(__name__)
 CORS(app)
 
@@ -466,6 +472,46 @@ def you_com_call():
         return jsonify(results)
     else:
         return jsonify({"error": "Failed to fetch articles from You.com"}), response.status_code
+
+@app.route('/hume-call', methods=['POST'])
+def hume_call():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part in the request"}), 400
+
+    file = request.files['file']
+
+    # If user does not select file, browser also
+    # submits an empty part without filename
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    if file:
+        # Secure the filename
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+        # Save the file to the server
+        file.save(file_path)
+
+        # Initialize the Hume client
+        humeclient = HumeBatchClient(os.getenv('HUME_API_KEY'))
+
+        # Configure the Hume job
+        config = FaceConfig()
+        job = humeclient.submit_job(None, [config], files=[file_path])
+
+        print(job)
+        print("Running...")
+
+        # Wait for the job to complete and download the predictions
+        details = job.await_complete()
+        prediction_file_path = os.path.join(app.config['UPLOAD_FOLDER'], "predictions.json")
+        job.download_predictions(prediction_file_path)
+
+        print("Predictions downloaded to", prediction_file_path)
+
+        # Return the path to the predictions file
+        return jsonify({"predictions_file": prediction_file_path})
 
 
 if __name__ == '__main__':
