@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, TextInput, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, Button, TextInput, Image, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator,ImageBackground } from 'react-native';
 import { Audio } from 'expo-av';
 import ky from 'ky';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';
+import background from '../assets/background.png';
+import articles from '../assets/articles.png';
+import cry from '../assets/cry.png';
+import emergency from '../assets/emergency.png';
+import journal from '../assets/journal.png';
+import symptoms from '../assets/symptoms.png';
+
 
 const ChatScreen = () => {
   const [messages, setMessages] = useState([]);
@@ -90,14 +97,52 @@ const ChatScreen = () => {
       console.error('Failed to upload file or get response', error);
     }
   };
+  const handlePress = (imageName) => {
+    alert(`You pressed ${imageName}`);
+  };
+  const chatOptions = () => {
+    return (
+      <View style={styles.contain}>
+        <Text style={{ fontSize: 25, fontWeight: 700, alignSelf: 'flex-start',  marginLeft:20, marginBottom:5}}>How May I Help You Today?</Text>
+        <Text style={{ fontSize: 20, alignSelf: 'flex-start', marginLeft:20 }}>Choose Action</Text>
+      <View style={styles.row}>
+        <TouchableOpacity onPress={() => handlePress('image1')}>
+          <Image source={emergency} style={styles.image} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handlePress('image2')}>
+          <Image source={symptoms} style={styles.image} />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.row}>
+        <TouchableOpacity onPress={() => handlePress('image3')}>
+          <Image source={cry} style={styles.image} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handlePress('image4')}>
+          <Image source={journal} style={styles.image} />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.row}>
+        <TouchableOpacity onPress={() => handlePress('image5')}>
+          <Image source={articles} style={styles.image} />
+        </TouchableOpacity>
+        {/* <View style={styles.placeholder} />  Placeholder for the empty spot */}
+      </View>
+    </View>
+    )
+  }
 
   return (
     <SafeAreaView style={styles.container}>
+      <ImageBackground
+        source={background}
+        style={styles.background}
+      >
       {loading ?
         <View style={{justifyContent:'center', flex:1}}>
           <ActivityIndicator size='large' />
         </View>
-        :
+          :
+          messages.length>0?
         <FlatList
       data={messages}
       keyExtractor={(item, index) => index.toString()}
@@ -106,23 +151,30 @@ const ChatScreen = () => {
           <Text>{item.content}</Text>
         </View>
       )}
-    />}
+            />
+            :  chatOptions()
+        }
+        <TouchableOpacity style={{ display: 'flex', alignItems: 'center', justifyContent:'center' }} onPress={recording ? stopRecording : startRecording}>
+          <View style={{ height: 100, width: 100, borderRadius: 50, justifyContent: 'center', alignItems: 'center', backgroundColor:recording?'rgba(0,0,0,0)':'#9CA8FB' }}>
+            <View style={{backgroundColor:'#757EFA',borderRadius:20, width:40, height:40,}}>
+          < MaterialCommunityIcons name='microphone' size={40} color={'black'} style={{}} />
+          </View>
+            </View>
+        </TouchableOpacity>
+
        <View style={{flexDirection:'row',  alignItems: 'center',position:'absolute',bottom:5,paddingHorizontal: 10, gap:20}}>
         <TextInput
           value={input}
           onChangeText={setInput}
           placeholder="Your question"
           style={styles.inputText} />
-        {input.length===0?
-          <TouchableOpacity style={styles.recordButton} onPress={recording ? stopRecording : startRecording}>
-          < MaterialCommunityIcons name='microphone' size={40} color={'black'} />
-          </TouchableOpacity>
-          : <TouchableOpacity style={styles.recordButton} onPress={()=>uploadText()}>
+        {<TouchableOpacity style={styles.recordButton} onPress={()=>uploadText()}>
               < MaterialCommunityIcons name='send' size={40} color={'black'} />
         </TouchableOpacity>
         }
         
         </View>
+        </ImageBackground>
     </SafeAreaView>
   );
 };
@@ -130,7 +182,11 @@ const ChatScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    // backgroundColor: 'white',
+    // justifyContent: 'center', 
+    display:'flex',
+    alignContent: 'center',
+    
   },
   message: {
     padding: 10,
@@ -164,7 +220,31 @@ const styles = StyleSheet.create({
     bottom: 10, 
     borderRadius:40,
     // position:'absolute'
-  }
+  }, 
+   background: {
+    flex: 1,
+    resizeMode: 'cover', // or 'stretch'
+    justifyContent: 'center',
+  },
+   contain: {
+    // flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+    marginBottom: 10,
+  },
+  image: {
+    // width: 100,
+    // height: 100,
+    margin: 10,
+  },
+  placeholder: {
+    width: 100,
+    height: 100,
+    margin: 10,
+  },
 });
 
 export default ChatScreen;
