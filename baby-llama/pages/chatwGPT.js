@@ -50,7 +50,7 @@ const ChatScreen = () => {
     const formData = new FormData();
     formData.append("text", input)
     try {
-      const response = await axios.post("http://10.56.193.152:5000/upload-text", { text: input });
+      const response = await axios.post("http://10.56.133.7:5000/upload-text", { text: input });
       const userMessage={type:'user', content:input}
       console.log(response.data.processedText)
       const newMessage = { type:'bot',content: response.data.processedText }
@@ -72,7 +72,7 @@ const ChatScreen = () => {
     }
     )
     try {
-      const response= await ky.post("http://10.56.193.152:5000/upload-audio", {
+      const response= await ky.post("http://10.56.133.7:5000/upload-audio", {
       body: formData,
     });
       if (!response.ok) {
