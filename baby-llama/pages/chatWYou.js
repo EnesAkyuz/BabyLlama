@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, TextInput, FlatList, StyleSheet } from 'react-native';
+import { View, Text, Button, TextInput, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
 import { Audio } from 'expo-av';
-// import axios from 'axios';
+import ky from 'ky';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import axios from 'axios';
 
 const ChatScreenYou = () => {
   const [messages, setMessages] = useState([]);
   const [recording, setRecording] = useState(null);
   const [recordingUri, setRecordingUri] = useState(null);
-
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     (async () => {
       const { status } = await Audio.requestPermissionsAsync();
@@ -38,59 +41,96 @@ const ChatScreenYou = () => {
     await recording.stopAndUnloadAsync();
     const uri = recording.getURI();
     setRecordingUri(uri);
-
     // Upload the audio
     uploadRecording(uri);
   };
 
+  
+  const uploadText = async () => {
+    setLoading(true);
+    const formData = new FormData();
+    formData.append("text", input)
+    try {
+      const response = await axios.post("http://10.56.193.152:5000/upload-text", { text: input });
+      const userMessage={type:'user', content:input}
+      console.log(response.data.processedText)
+      const newMessage = { type:'bot',content: response.data.processedText }
+      setMessages([...messages, userMessage, newMessage])
+      setInput("");
+    } catch (error) {
+      console.error('Failed to upload file or get response', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const uploadRecording = async (uri) => {
     const formData = new FormData();
-    formData.append('audio', {
+    formData.append("audio", {
       uri,
-      type: 'audio/x-m4a',
+      type: `audio.m4a`,
       name: 'recording.m4a',
+    }
+    )
+    try {
+      const response= await ky.post("http://10.56.193.152:5000/upload-audio", {
+      body: formData,
     });
+      if (!response.ok) {
+        throw new Error('Failed to upload file');
+      }
 
-    // try {
-    //   const response = await axios.post('http://127.0.0.1:5000/upload', formData, {
-    //     headers: {
-    //       'Content-Type': 'multipart/form-data',
-    //     },
-    //   });
-
-    //   if (response.status === 200) {
-    //     const chatResponse = await axios.get('http://127.0.0.1:5000/get-response');
-    //     setMessages([...messages, { type: 'user', content: 'Audio message' }, { type: 'bot', content: chatResponse.data.message }]);
-    //   }
-    // } catch (error) {
-    //   console.error('Failed to upload file or get response', error);
-    // }
+      // const data = await response;
+      console.log('Server response:', response);
+      // if (response.status === 200) {
+      //   console.log("success")
+      //   // const chatResponse = await axios.get('http://127.0.0.1:5000/get-response');
+      //   // setMessages([...messages, { type: 'user', content: 'Audio message' }, { type: 'bot', content: chatResponse.data.message }]);
+      // }
+    } catch (error) {
+      console.error('Failed to upload file or get response', error);
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={messages}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View style={[styles.message, item.type === 'user' ? styles.userMessage : styles.botMessage]}>
-            <Text>{item.content}</Text>
-          </View>
-        )}
-      />
-      <Button
-        title={recording ? 'Stop Recording' : 'Start Recording'}
-        onPress={recording ? stopRecording : startRecording}
-        style={styles.recordButton}
-      />
-    </View>
+    <SafeAreaView style={styles.container}>
+      {loading ? <View style={{justifyContent:'center', flex:1}}>
+          <ActivityIndicator size='large' />
+        </View>
+        :
+        <FlatList
+      data={messages}
+      keyExtractor={(item, index) => index.toString()}
+      renderItem={({ item }) => (
+        <View style={[styles.message, item.type === 'user' ? styles.userMessage : styles.botMessage]}>
+          <Text>{item.content}</Text>
+        </View>
+      )}
+    />}
+       <View style={{flexDirection:'row',  alignItems: 'center',justifyContent: 'flex-end',paddingHorizontal: 10, gap:20}}>
+        <TextInput
+          value={input}
+          onChangeText={setInput}
+          placeholder="Your article search"
+          style={styles.inputText} />
+        {input.length===0?
+          <TouchableOpacity style={styles.recordButton} onPress={recording ? stopRecording : startRecording}>
+          < MaterialCommunityIcons name='microphone' size={40} color={'black'} />
+          </TouchableOpacity>
+          : <TouchableOpacity style={styles.recordButton} onPress={()=>uploadText()}>
+              < MaterialCommunityIcons name='send' size={40} color={'black'} />
+        </TouchableOpacity>
+        }
+        
+        </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
   },
   message: {
     padding: 10,
@@ -99,19 +139,31 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   userMessage: {
-    backgroundColor: '#d1e7dd',
+    backgroundColor: 'lightblue',
     alignSelf: 'flex-end',
   },
   botMessage: {
-    backgroundColor: '#f8d7da',
+    backgroundColor: 'lightgray',
     alignSelf: 'flex-start',
   },
   recordButton: {
-    position: 'absolute',
+    // position: 'absolute',
     bottom: 10,
-    left: '50%',
-    // transform: [{ translateX: -50% }],
-  },
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderRadius: 40,
+    flex:0
+  }, 
+  inputText: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 10, 
+    fontSize: 20,
+    borderWidth: 1,
+    bottom: 10, 
+    borderRadius:40,
+    // position:'absolute'
+  }
 });
-
 export default ChatScreenYou;
