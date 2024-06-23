@@ -94,9 +94,9 @@ export default function BabyScreen({ navigation }) {
   }
       return (
     
-        <SafeAreaView>
-          <Text style={styles.bigText}>Kay's Journey</Text>
-          <View style={{display:'flex', flexDirection:'row', gap: 50}}>
+        <SafeAreaView style={{backgroundColor:'white', height:'100%'}}>
+          <Text style={styles.bigText}>Baby's Journey</Text>
+          <View style={{display:'flex', flexDirection:'row', gap: 50, marginLeft:10}}>
           <View style={{display:'flex', flexDirection:'column'}}>
                 <Image source={babyImage} style={styles.circle}/>
                 <Text style={styles.text}>15 days old</Text>
@@ -162,6 +162,7 @@ const styles = StyleSheet.create({
   bigText: {
     fontSize: 24,
     fontWeight: 'bold',
+    margin:10,
     // color: 'white',
   },
     text: {

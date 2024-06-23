@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, TextInput, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, Button, TextInput, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator, ImageBackground } from 'react-native';
 import { Audio } from 'expo-av';
 import ky from 'ky';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';
+import background from '../assets/background.png';
+import predictions from '../assets/predictions.json'
 
 const ChatScreenYou = () => {
   const [messages, setMessages] = useState([]);
@@ -11,6 +13,7 @@ const ChatScreenYou = () => {
   const [recordingUri, setRecordingUri] = useState(null);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
   useEffect(() => {
     (async () => {
       const { status } = await Audio.requestPermissionsAsync();
@@ -73,41 +76,56 @@ const ChatScreenYou = () => {
     }
     )
     try {
-      const response= await ky.post("http://10.56.193.152:5000/upload-audio", {
+      const response= await ky.post("http://10.56.193.152:5000/hume-call", {
       body: formData,
     });
-      if (!response.ok) {
-        throw new Error('Failed to upload file');
-      }
-
-      // const data = await response;
-      console.log('Server response:', response);
-      // if (response.status === 200) {
-      //   console.log("success")
-      //   // const chatResponse = await axios.get('http://127.0.0.1:5000/get-response');
-      //   // setMessages([...messages, { type: 'user', content: 'Audio message' }, { type: 'bot', content: chatResponse.data.message }]);
-      // }
+    
     } catch (error) {
       console.error('Failed to upload file or get response', error);
+    }
+    // console.log(predictions)
+    const results = predictions[0].results.predictions[0].models.prosody.grouped_predictions[0].predictions[0].emotions
+    // [0].source.results.predictions[0].models.prosody.metadata
+    // console.log(results)
+
+    if (results) {
+      results.sort((a, b) => b.score - a.score)
+      const top5Emotion = results.slice(0, 5)
+      const top5String = top5Emotion.map((item, index) => `${index + 1}. ${item.name}, Score: ${item.score}`).join('\n');
+      setMessages(top5String)
+      setSent(true);
+    } else {
+      setMessages('Error rendering emotions')
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {loading && <View style={{ justifyContent: 'center', flex: 1 }}>
+      <ImageBackground
+        source={background}
+        style={styles.background}
+      >
+      {loading ? <View style={{ justifyContent: 'center', flex: 1 }}>
         <ActivityIndicator size='large' />
-      </View>}
-          <View style={{display: 'flex', alignItems: 'center', justifyContent:'center', flex:1 }}>
-          <Text style={{ fontSize: 25, fontWeight: 500, alignSelf: 'center', marginBottom:15,}}>Add a journal entry</Text>
-          <TouchableOpacity  onPress={recording ? stopRecording : startRecording}>
-          <View style={{ height: 100, width: 100, borderRadius: 50, justifyContent: 'center', alignItems: 'center', backgroundColor:recording?'rgba(0,0,0,0)':'#9CA8FB' }}>
-            <View style={{backgroundColor:'#757EFA',borderRadius:20, width:40, height:40,}}>
-          < MaterialCommunityIcons name='microphone' size={40} color={'black'} style={{}} />
+        </View>
+          : 
+          <View style={{ backgroundColor: 'white', borderRadius: 10, padding: 20 }}>
+            <Text style={{fontSize:20, fontVariant:'bold', fontWeight:700, marginBottom:10}}>Your mood details</Text>
+            <Text>{messages}</Text>
           </View>
-            </View>
-        </TouchableOpacity>
-</View>
-        
+        }
+        {!sent &&
+          <View style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+            <Text style={{ fontSize: 25, fontWeight: 500, alignSelf: 'center', marginBottom: 15, }}>Add a journal entry</Text>
+            <TouchableOpacity onPress={recording ? stopRecording : startRecording}>
+              <View style={{ height: 100, width: 100, borderRadius: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: recording ? 'rgba(0,0,0,0)' : '#9CA8FB' }}>
+                <View style={{ backgroundColor: '#757EFA', borderRadius: 20, width: 40, height: 40, }}>
+                  < MaterialCommunityIcons name='microphone' size={40} color={'black'} style={{}} />
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>}
+        </ImageBackground>
     </SafeAreaView>
   );
 };
@@ -149,6 +167,11 @@ const styles = StyleSheet.create({
     bottom: 10, 
     borderRadius:40,
     // position:'absolute'
-  }
+  }, 
+     background: {
+    flex: 1,
+    resizeMode: 'cover', // or 'stretch'
+    justifyContent: 'center',
+  },
 });
 export default ChatScreenYou;

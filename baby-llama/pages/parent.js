@@ -12,8 +12,12 @@ const Bar = ({ label, fill }) => {
 };
 export default function ParentScreen({ navigation }) {
     return (
-        <SafeAreaView style={{height:'100%'}}>
-        <Text style={styles.text}>Sophie Corner</Text>
+      <SafeAreaView style={{ height: '100%', backgroundColor:'white'}}>
+        <Text style={styles.text}>Mom's Corner</Text>
+        <View style={{padding:20, borderRadius:20, borderWidth:1, margin:5, borderColor:'#757EFA'}}>
+          <Text style={{ fontSize: 20, marginBottom:5 }}>You may be experiencing postpartum depression.</Text>
+          <Text>1 in 5 women feel the same</Text>
+        </View>
         <Text style={styles.text}>Emotional Tracker</Text>
             <ScrollView contentContainerStyle={styles.container}>
             <Bar label="Anxiety" fill={70} />
@@ -54,9 +58,9 @@ const styles = StyleSheet.create({
     shadowRadius: 4,  // Adds shadow for iOS
     }, 
     text: {
-        fontSize: 25,
-        fontWeight: 700,
-        marginLeft: 10
+      fontSize: 25,
+      fontWeight: 700,
+      marginLeft: 10
     },
     helpButton: {
     position: 'absolute',

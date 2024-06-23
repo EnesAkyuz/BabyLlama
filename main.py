@@ -247,6 +247,7 @@ from werkzeug.utils import secure_filename
 
 # openai dependencies
 import sys
+import time
 from openai import OpenAI, AsyncOpenAI, audio
 
 # audio stuff
@@ -261,7 +262,8 @@ from lmnt.api import Speech
 from hume import HumeBatchClient
 from hume.models.config import FaceConfig
 import asyncio
-
+from hume import HumeBatchClient
+from hume.models.config import ProsodyConfig, LanguageConfig
 
 
 app = Flask(__name__)
@@ -481,46 +483,37 @@ def you_com_call():
         return jsonify(results)
     else:
         return jsonify({"error": "Failed to fetch articles from You.com"}), response.status_code
-
+HUME_API_KEY = ''  # Replace with your Hume.ai API key
+HUME_API_URL = 'https://api.hume.ai/v0/batch/jobs'
 @app.route('/hume-call', methods=['POST'])
 def hume_call():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part in the request"}), 400
+    if 'audio' not in request.files:
+        return jsonify({'message': 'No audio file provided'}), 400
 
-    file = request.files['file']
+    audiofile = request.files['audio']
+    if audiofile.filename == '':
+        return jsonify({'message': 'No selected file'}), 400
 
-    # If user does not select file, browser also
-    # submits an empty part without filename
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
+    if audiofile:
+        filename = secure_filename(audiofile.filename)
+        filepath = os.path.join(os.getcwd(),app.config['UPLOAD_FOLDER'], filename)
+        print(app.config['UPLOAD_FOLDER'])
+        print(filepath)
+        audiofile.save(filepath)
 
-    if file:
-        # Secure the filename
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    humeclient = HumeBatchClient(HUME_API_KEY)
+    filepaths = [filepath]
+    config = [ProsodyConfig(), LanguageConfig()]
 
-        # Save the file to the server
-        file.save(file_path)
-
-        # Initialize the Hume client
-        humeclient = HumeBatchClient(os.getenv('HUME_API_KEY'))
-
-        # Configure the Hume job
-        config = FaceConfig()
-        job = humeclient.submit_job(None, [config], files=[file_path])
-
-        print(job)
-        print("Running...")
-
-        # Wait for the job to complete and download the predictions
-        details = job.await_complete()
-        prediction_file_path = os.path.join(app.config['UPLOAD_FOLDER'], "predictions.json")
-        job.download_predictions(prediction_file_path)
-
-        print("Predictions downloaded to", prediction_file_path)
-
-        # Return the path to the predictions file
-        return jsonify({"predictions_file": prediction_file_path})
+    # Submit job to Hume.ai
+    job = humeclient.submit_job(None, config, files=filepaths)
+    print(job)
+    print("Running...")
+    details = job.await_complete()
+    job.download_predictions("baby-llama/assets/predictions.json")
+    print("Predictions downloaded to predictions.json")
+    print(job.get_predictions())
+    return job.get_predictions()
 
 
 if __name__ == '__main__':

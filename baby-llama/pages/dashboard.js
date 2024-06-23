@@ -144,7 +144,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   circleSelected: {
-    borderColor: 'green',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: 'gray',
+    marginRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    color:'gray'
   },
   innerCircle: {
     width: 12,
