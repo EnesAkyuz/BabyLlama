@@ -245,16 +245,47 @@ import os
 from datetime import datetime
 from werkzeug.utils import secure_filename
 
+# openai dependencies
+import sys
+from openai import OpenAI, AsyncOpenAI
+
 app = Flask(__name__)
 CORS(app)
 
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Initialize the OpenAI client and chat history
+chat_history = []
+client = OpenAI()
+MODEL = 'gpt-3.5-turbo'
+
+
 @app.route('/upload-text', methods=['POST'])
 def upload_text():
+
+    # Get the data from React Native
     data = request.get_json()
-    processed_text = data['text'].upper()  # Example of processing: converting text to uppercase
+    user_input = data["text"]
+
+    # Add user's message to chat history
+    chat_history.append({"role": "user", "content": user_input})
+
+    stream = client.chat.completions.create(
+        model=MODEL,
+        messages=chat_history,
+        stream=True,
+    )
+
+    response = ''
+    for chunk in stream:
+        if chunk.choices[0].delta.content is not None:
+            response += chunk.choices[0].delta.content
+
+    # Add GPT's response to chat history
+    chat_history.append({"role": "assistant", "content": response})
+    processed_text = response
+
     return jsonify({
         'message': 'Text processed successfully',
         'processedText': processed_text
