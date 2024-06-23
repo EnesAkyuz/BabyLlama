@@ -238,7 +238,6 @@ if __name__ == "__main__":
     CORS(app)  # Enables CORS for all domains, adjust as necessary for production
     app.run(debug=True, port=5000)
 """
-
 import socket
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -253,10 +252,6 @@ from openai import OpenAI, AsyncOpenAI, audio
 # audio stuff
 from pydub import AudioSegment
 from pathlib import Path
-
-# you.com stuff
-import requests
-
 
 app = Flask(__name__)
 CORS(app)
@@ -362,11 +357,13 @@ def upload_audio():
         with speech_file_path.open('wb') as f:
             for chunk in response.iter_bytes():
                 f.write(chunk)
-
+        
+        print(str(speech_file_path))
         return jsonify({
             'message': 'Audio processed successfully',
-            'processedText': processed_text,
-            'audioFile': str(speech_file_path)
+            'processedText':str(chat_history[-1]['content']),
+            'audioFile': str(speech_file_path),
+            'userInput':str(chat_history[-2]['content'])
         })
 
 def get_ip_address():
@@ -382,20 +379,6 @@ def get_ip_address():
         s.close()
     return ip
 
-@app.route('/epic-youdotcom-stuff', methods=['POST'])
-def epic_youdotcom_stuff():
-    query = " ".join([message["content"] for message in chat_history])
-    print(query)
-
-    headers = {"X-API-Key": os.getenv('YOU_API_KEY')}
-    params = {"query": query}
-    response = requests.get(
-        f"https://api.ydc-index.io/search?query={query}",
-        params=params,
-        headers=headers,
-    ).json()
-
-    print(response)
 
 if __name__ == '__main__':
     if not os.path.exists(UPLOAD_FOLDER):
