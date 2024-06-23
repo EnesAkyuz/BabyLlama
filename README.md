@@ -1,4 +1,10 @@
-# BabyLlama
+<div align="center">
+  <b>Baby Llama</b>
+</div>
+
+<p align="center">
+  <img src="FINAL%20LOGO.png" alt="Final Logo" width="200">
+</p>
 
 **Welcome to our family friendly repository for BabyLlama! Built entirely at Berkeley AI Hackathon by [Enes Akyuz](https://github.com/EnesAkyuz), Eylül Yıldırım, [Alina Erofeeva](https://github.com/alinaerf). Give us a visit if you can!**
 
