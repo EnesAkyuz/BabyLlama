@@ -93,7 +93,10 @@ const ChatScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {loading ? <ActivityIndicator size='large'/>
+      {loading ?
+        <View style={{justifyContent:'center', flex:1}}>
+          <ActivityIndicator size='large' />
+        </View>
         :
         <FlatList
       data={messages}
@@ -104,7 +107,7 @@ const ChatScreen = () => {
         </View>
       )}
     />}
-       <View style={{flexDirection:'row',  alignItems: 'center',justifyContent: 'flex-end',paddingHorizontal: 10, gap:20}}>
+       <View style={{flexDirection:'row',  alignItems: 'center',position:'absolute',bottom:5,paddingHorizontal: 10, gap:20}}>
         <TextInput
           value={input}
           onChangeText={setInput}

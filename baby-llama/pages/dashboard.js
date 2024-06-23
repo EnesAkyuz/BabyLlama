@@ -1,6 +1,7 @@
-import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, ScrollView} from 'react-native';
+import { View, Image, Text, SafeAreaView, TouchableOpacity, StyleSheet, ScrollView} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import events from "../db/parent_events.json"
+import babyImage from '../assets/baby-placeholder.jpg'
 const Box = ({ isPlus }) => {
   return (
     <View style={styles.box}>
@@ -18,9 +19,23 @@ export default function DashboardScreen({ navigation }) {
             < MaterialCommunityIcons name='bell-outline' size={30} color={'black'} />
           </TouchableOpacity>
             </View>
-            <View style={styles.circle}>
-                <Text style={styles.text}>Baby Llama is 15 days old.</Text>
+            <View style={{display:'flex', flexDirection:'row', margin:15, gap: 100, alignItems:'center'}}>
+            <View style={{display:'flex', flexDirection:'column'}}>
+                <Image source={babyImage} style={styles.circle}/>
+                <Text style={styles.text}>15 days old</Text>
+          </View>
+          <View style={{ display: 'flex', flexDirection: 'column', gap:15 }}>
+            <View style={{display:'flex', flexDirection:'row',alignItems:'center'}}>
+              <MaterialCommunityIcons  name='human-male-height' size={40} color={'black'}/>
+            <Text style={styles.text}>46 cm</Text>
             </View>
+            <View style={{display:'flex', flexDirection:'row', alignItems:'center'}}>
+              <MaterialCommunityIcons name='weight-gram' size={40} color={'black'}/>
+            <Text style={styles.text}>4.2 kg</Text>
+            </View>
+            
+          </View>
+          </View>
             <View style={styles.horizontalScrollViewContainer}>
             <ScrollView horizontal contentContainerStyle={styles.horizontalScrollView}
         showsHorizontalScrollIndicator={true}>
@@ -66,18 +81,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   circle: {
-    width: 200,  // Adjust the size of the circle as needed
-    height: 200,
-    borderRadius: 100,  // This makes the view a circle
+    width: 100,  // Adjust the size of the circle as needed
+    height: 100,
+    borderRadius: 50,  // This makes the view a circle
     backgroundColor: 'skyblue',
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf:'center'
   },
   text: {
-    fontSize: 24,  // Adjust the size of the text as needed
+    fontSize: 16,  // Adjust the size of the text as needed
     fontWeight: 'bold',
-    color: 'white',
+    color: 'black',
     textAlign:'center'
   },
     helpButton: {
