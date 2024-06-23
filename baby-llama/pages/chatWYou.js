@@ -94,35 +94,20 @@ const ChatScreenYou = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {loading ? <View style={{justifyContent:'center', flex:1}}>
-          <ActivityIndicator size='large' />
-        </View>
-        :
-        <FlatList
-      data={messages}
-      keyExtractor={(item, index) => index.toString()}
-      renderItem={({ item }) => (
-        <View style={[styles.message, item.type === 'user' ? styles.userMessage : styles.botMessage]}>
-          <Text>{item.content}</Text>
-        </View>
-      )}
-    />}
-       <View style={{flexDirection:'row',  alignItems: 'center',justifyContent: 'flex-end',paddingHorizontal: 10, gap:20}}>
-        <TextInput
-          value={input}
-          onChangeText={setInput}
-          placeholder="Your article search"
-          style={styles.inputText} />
-        {input.length===0?
-          <TouchableOpacity style={styles.recordButton} onPress={recording ? stopRecording : startRecording}>
-          < MaterialCommunityIcons name='microphone' size={40} color={'black'} />
-          </TouchableOpacity>
-          : <TouchableOpacity style={styles.recordButton} onPress={()=>uploadText()}>
-              < MaterialCommunityIcons name='send' size={40} color={'black'} />
+      {loading && <View style={{ justifyContent: 'center', flex: 1 }}>
+        <ActivityIndicator size='large' />
+      </View>}
+          <View style={{display: 'flex', alignItems: 'center', justifyContent:'center', flex:1 }}>
+          <Text style={{ fontSize: 25, fontWeight: 500, alignSelf: 'center', marginBottom:15,}}>Add a journal entry</Text>
+          <TouchableOpacity  onPress={recording ? stopRecording : startRecording}>
+          <View style={{ height: 100, width: 100, borderRadius: 50, justifyContent: 'center', alignItems: 'center', backgroundColor:recording?'rgba(0,0,0,0)':'#9CA8FB' }}>
+            <View style={{backgroundColor:'#757EFA',borderRadius:20, width:40, height:40,}}>
+          < MaterialCommunityIcons name='microphone' size={40} color={'black'} style={{}} />
+          </View>
+            </View>
         </TouchableOpacity>
-        }
+</View>
         
-        </View>
     </SafeAreaView>
   );
 };

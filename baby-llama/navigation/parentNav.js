@@ -10,7 +10,7 @@ export default function ParentNav() {
             }}
         >
             <ParentStack.Screen name="ParentPage" component={ParentScreen} />
-            <ParentStack.Screen name="ChatWYou" component={ChatScreenYou} />
+            <ParentStack.Screen name="Journal" component={ChatScreenYou} />
           </ParentStack.Navigator>
     )
 }

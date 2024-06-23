@@ -89,17 +89,6 @@ const ChatScreen = () => {
       const response= await ky.post("http://10.56.193.152:5000/upload-audio", {
       body: formData,
     }).json();
-      // if (!response.ok) {
-      //   throw new Error('Failed to upload file');
-      // }
-
-      // const data = await response;
-      // console.log('Server response:', response.data);
-      // if (response.status === 200) {
-      //   console.log("success")
-      //   // const chatResponse = await axios.get('http://127.0.0.1:5000/get-response');
-      //   // setMessages([...messages, { type: 'user', content: 'Audio message' }, { type: 'bot', content: chatResponse.data.message }]);
-      // }
       console.log(response)
       const userMessage={type:'user', content:response.userInput}
       const newMessage = { type: 'bot', content: response.processedText, audioVer:response.audioFile }
@@ -128,16 +117,15 @@ const ChatScreen = () => {
         <TouchableOpacity onPress={() => handlePress('image3')}>
           <Image source={cry} style={styles.image} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handlePress('image4')}>
-          <Image source={journal} style={styles.image} />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.row}>
         <TouchableOpacity onPress={() => youCom()}>
           <Image source={articles} style={styles.image} />
         </TouchableOpacity>
-        {/* <View style={styles.placeholder} />  Placeholder for the empty spot */}
       </View>
+      {/* <View style={styles.row}>
+        <TouchableOpacity onPress={() => youCom()}>
+          <Image source={articles} style={styles.image} />
+        </TouchableOpacity>
+      </View> */}
     </View>
     )
   }
@@ -203,7 +191,7 @@ const ChatScreen = () => {
         </View>
           :
           messages.length>0?
-        <FlatList
+            <FlatList
       data={messages}
       keyExtractor={(item, index) => index.toString()}
       renderItem={({ item }) => (
@@ -217,7 +205,7 @@ const ChatScreen = () => {
             />
             :  chatOptions()
         }
-        <TouchableOpacity style={{ display: 'flex', alignItems: 'center', justifyContent:'center' }} onPress={recording ? stopRecording : startRecording}>
+        <TouchableOpacity style={{ display: 'flex', alignItems: 'center', justifyContent:'center', marginBottom:80 }} onPress={recording ? stopRecording : startRecording}>
           <View style={{ height: 100, width: 100, borderRadius: 50, justifyContent: 'center', alignItems: 'center', backgroundColor:recording?'rgba(0,0,0,0)':'#9CA8FB' }}>
             <View style={{backgroundColor:'#757EFA',borderRadius:20, width:40, height:40,}}>
           < MaterialCommunityIcons name='microphone' size={40} color={'black'} style={{}} />

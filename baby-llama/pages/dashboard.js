@@ -49,7 +49,8 @@ export default function DashboardScreen({ navigation }) {
                 <Box key={index} />
                 ))}
             </ScrollView>
-</View>
+        </View>
+        <ScrollView>
             <View>
                 <Text style={{fontSize:25, fontWeight:700, marginLeft:10}}>Tasks</Text>
                 {tasks.map((task) => {
@@ -72,7 +73,8 @@ export default function DashboardScreen({ navigation }) {
                             <Text style={styles.taskText}>{event.name}</Text>
                         </TouchableOpacity>)
                 })}
-            </View>
+          </View>
+          </ScrollView>
             <TouchableOpacity style={styles.helpButton} onPress={()=>navigation.navigate("ChatWGPT")}>
                 <Text style={styles.helpButtonText}>Chat with AI Helper</Text>
             </TouchableOpacity>
@@ -106,7 +108,7 @@ const styles = StyleSheet.create({
     bottom: 20,  // Distance from the bottom of the screen
     width: 250,
     padding: 15,
-    backgroundColor: 'skyblue',
+    backgroundColor: '#9CA8FB',
     borderRadius: 25,
     alignItems: 'center',
     alignSelf:'center',

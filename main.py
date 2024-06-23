@@ -260,6 +260,7 @@ from lmnt.api import Speech
 # hume stuff
 from hume import HumeBatchClient
 from hume.models.config import FaceConfig
+import asyncio
 
 
 
@@ -393,51 +394,59 @@ def get_ip_address():
     finally:
         s.close()
     return ip
+# Constants
+VOICE_ID = '20ba5b9c-0fe6-4b8e-bb94-0b28f890249c'
 
+async def reader_task(conn):
+    """Streams audio data from the server and writes it to output.mp3."""
+    with open('baby-llama/assets/story.mp3', 'wb') as f:
+        async for msg in conn:
+            f.write(msg['audio'])
+story=[]
+async def writer_task(conn, prompt):
+    """Streams text from ChatGPT to LMNT."""
+    client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+    response = await client.chat.completions.create(model=MODEL,
+                                                    messages=[{'role': 'user', 'content': prompt}],
+                                                    stream=True)
+    # story.append(response)
+    # print(response.data)
+    story_text=''
+    async for chunk in response:
+        if not chunk.choices[0] or not chunk.choices[0].delta or not chunk.choices[0].delta.content:
+            continue
+        content = chunk.choices[0].delta.content
+        story_text+=content
+        await conn.append_text(content)
+        print(content, end='', flush=True)
+    story.append(story_text)
+    await conn.finish()
+
+async def run_speech(prompt, language):
+    speech = Speech(os.getenv('LMNT_API_KEY'))
+    # voices = await speech.list_voices()
+    #print(voices)
+    conn = await speech.synthesize_streaming(VOICE_ID, return_extras=False, language=language)
+    t1 = asyncio.create_task(reader_task(conn))
+    t2 = asyncio.create_task(writer_task(conn, prompt))
+
+    await t1
+    await t2
+    await speech.close()
 @app.route('/lmnt-call', methods=['POST'])
 def lmnt_call():
+    prompt =  'Tell me a bedtime story.'
+    language = 'en'
 
-    LMNT_API_KEY = os.getenv('LMNT_API_KEY')
+    # Run the asynchronous function
+    asyncio.run(run_speech(prompt, language))
 
-    audio_file = request.files['audio']
-
-    # 1. Upload audio to LMNT for voice cloning
-    lmnt_response = requests.post(
-        'https://api.lmnt.com/v1/voice-clone',
-        headers={'Authorization': f'Bearer {LMNT_API_KEY}'},
-        files={'audio': audio_file}
-    )
-    lmnt_data = lmnt_response.json()
-    cloned_voice_url = lmnt_data['cloned_voice_url']  # Assume this is the URL of the cloned voice
-
-    # 2. Generate content with ChatGPT
-    stream = client.chat.completions.create(
-        model=MODEL,
-        messages=[{"role": "system", "content": "Create a bedtime story"}],
-        stream=True,
-        max_tokens=1000
-    )
-
-    story_text = ''
-    for chunk in stream:
-        if chunk.choices[0].delta.content is not None:
-            story_text += chunk.choices[0].delta.content
-
-    # 3. Synthesize the story using the cloned voice
-    synthesis_response = requests.post(
-        'https://api.lmnt.com/v1/synthesize',
-        headers={'Authorization': f'Bearer {LMNT_API_KEY}'},
-        json={
-            'voice_url': cloned_voice_url,
-            'text': story_text
-        }
-    )
-    synthesized_story_url = synthesis_response.json()['synthesized_audio_url']
-
+    # Return response
     return jsonify({
-        'story_text': story_text,
-        'synthesized_story_url': synthesized_story_url
+        'message': 'Processing completed',
+        'text':story[-1]        
     })
+    
 
 @app.route('/you-com-call', methods=['POST'])
 def you_com_call():

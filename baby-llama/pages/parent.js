@@ -1,28 +1,30 @@
-import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import journals from '../db/journal_entries.json'
+const Bar = ({ label, fill }) => {
+  return (
+    <View style={styles.barContainer}>
+      <Text style={styles.label}>{label}</Text>
+      <View style={styles.bar}>
+        <View style={[styles.fill, { width: `${fill}%` }]} />
+      </View>
+    </View>
+  );
+};
 export default function ParentScreen({ navigation }) {
     return (
-        <SafeAreaView>
-            <TouchableOpacity style={styles.addBtn}>
-                <Text>Add new journal entry</Text>
-            </TouchableOpacity>
+        <SafeAreaView style={{height:'100%'}}>
+        <Text style={styles.text}>Sophie Corner</Text>
+        <Text style={styles.text}>Emotional Tracker</Text>
+            <ScrollView contentContainerStyle={styles.container}>
+            <Bar label="Anxiety" fill={70} />
+            <Bar label="Sadness" fill={50} />
+            <Bar label="Self-doubt" fill={90} />
+            <Bar label="Happiness" fill={30} />
+            <Bar label="Anger" fill={80} />
+            </ScrollView>
 
-            <View>
-                <Text style={styles.text}>Previous Journal Entries</Text>
-                 {journals.map((entry) => {
-                    return (
-                        <TouchableOpacity style={styles.taskContainer} key={entry.id}>
-                            <Text style={styles.taskText}>{entry.transcription}</Text>
-                            <Text>{entry.date}</Text>
-                        </TouchableOpacity>)
-                })}
-            </View>
-            <View>
-                <Text style={styles.text}>Mood Trends</Text>
-            </View>
-
-            <TouchableOpacity style={styles.helpButton} onPress={()=>navigation.navigate("ChatWYou")}>
-                <Text style={styles.helpButtonText}>Find an article</Text>
+            <TouchableOpacity style={styles.helpButton} onPress={()=>navigation.navigate('Journal')}>
+                <Text style={styles.helpButtonText}>Add Journal Story</Text>
             </TouchableOpacity>
         </SafeAreaView>
     )
@@ -58,10 +60,10 @@ const styles = StyleSheet.create({
     },
     helpButton: {
     position: 'absolute',
-    bottom: 0,  // Distance from the bottom of the screen
+    bottom: 10,  // Distance from the bottom of the screen
     width: 250,
     padding: 15,
-    backgroundColor: 'skyblue',
+    backgroundColor: '#9CA8FB',
     borderRadius: 25,
     alignItems: 'center',
     alignSelf:'center',
@@ -71,5 +73,28 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     textAlign:'center'
+    },
+    barContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    
+  },
+  label: {
+    width: 80,
+    fontSize: 16,
+    marginLeft: 8,
+  },
+  bar: {
+    flex: 1,
+    height: 20,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginRight:10
+  },
+  fill: {
+    height: '100%',
+    backgroundColor: '#757EFA',
     },
 })

@@ -1,8 +1,14 @@
-import { View, Text, SafeAreaView } from 'react-native';
+import { View, Text, SafeAreaView, Image } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useState } from 'react';
 import { Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { Audio } from 'expo-av';
+import background from '../assets/baby-top.png'
+import babyImage from '../assets/baby-placeholder.jpg';
+import story from '../assets/story.png';
+import lullaby from '../assets/lullaby.png';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
 
 export default function BabyScreen({ navigation }) {
     /**
@@ -23,15 +29,15 @@ export default function BabyScreen({ navigation }) {
         return <View/>
     }
 
-    if (!permission.granted) {
-    // Camera permissions are not granted yet.
-    return (
-      <View style={styles.container}>
-        <Text style={{ textAlign: 'center' }}>We need your permission to use the camera</Text>
-        <Button onPress={requestPermission} title="grant permission" />
-      </View>
-    );
-    }
+    // if (!permission.granted) {
+    // // Camera permissions are not granted yet.
+    // return (
+    //   <View style={styles.container}>
+    //     <Text style={{ textAlign: 'center' }}>We need your permission to use the camera</Text>
+    //     <Button onPress={requestPermission} title="grant permission" />
+    //   </View>
+    // );
+    // }
     if (!permissionResponse.granted) {
     // Camera permissions are not granted yet.
     return (
@@ -42,17 +48,17 @@ export default function BabyScreen({ navigation }) {
     );
     }
 
-    const cameraButton= () => {
-        return (
-            <CameraView style={styles.camera} facing={facing}>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={()=>setOpenCamera(false)}>
-            <Text style={styles.text}>Close Camera</Text>
-          </TouchableOpacity>
-        </View>
-      </CameraView>
-        )
-    }
+    // const cameraButton= () => {
+    //     return (
+    //         <CameraView style={styles.camera} facing={facing}>
+    //     <View style={styles.buttonContainer}>
+    //       <TouchableOpacity style={styles.button} onPress={()=>setOpenCamera(false)}>
+    //         <Text style={styles.text}>Close Camera</Text>
+    //       </TouchableOpacity>
+    //     </View>
+    //   </CameraView>
+    //     )
+    // }
     async function startRecording() {
     try {
       if (permissionResponse.status !== 'granted') {
@@ -87,7 +93,39 @@ export default function BabyScreen({ navigation }) {
     console.log('Recording stopped and stored at', uri);
   }
       return (
-    <View style={styles.container}>
+    
+        <SafeAreaView>
+          <Text style={styles.bigText}>Kay's Journey</Text>
+          <View style={{display:'flex', flexDirection:'row', gap: 50}}>
+          <View style={{display:'flex', flexDirection:'column'}}>
+                <Image source={babyImage} style={styles.circle}/>
+                <Text style={styles.text}>15 days old</Text>
+            </View>
+            <View style={{display:'flex', flexDirection:'column', alignSelf:'center', gap:20}}>
+            <Text style={styles.text}>Early Developmental Stage</Text>
+            <Text style={styles.text}>56%</Text>
+            </View>
+          </View>
+          <View style={{ display: 'flex', flexDirection: 'row', gap:50, alignItems:'center',justifyContent:'center', marginTop:20 }}>
+            <View style={{display:'flex', flexDirection:'row',alignItems:'center'}}>
+              <MaterialCommunityIcons  name='human-male-height' size={40} color={'black'}/>
+            <Text style={styles.text}>46 cm</Text>
+            </View>
+            <View style={{display:'flex', flexDirection:'row', alignItems:'center'}}>
+              <MaterialCommunityIcons name='weight-gram' size={40} color={'black'}/>
+            <Text style={styles.text}>4.2 kg</Text>
+            </View>
+          </View>
+
+
+          <Text style={styles.bigText}>Lullabies and Stories</Text>
+          <TouchableOpacity style={{margin:5}} onPress={()=>navigation.navigate('RecordAudio')}><Image source={story} style={{width:'100%'}} /></TouchableOpacity>
+          <TouchableOpacity style={{margin:5}}onPress={()=>navigation.navigate('RecordAudio')}><Image source={lullaby} style={{width:'100%'}}/></TouchableOpacity>
+        </SafeAreaView>
+  );
+}
+
+{/* <View style={styles.container}>
         {!openCamera?
               ( <View>
                       <Button title={'Open Camera'} onPress={()=>setOpenCamera(true) } />
@@ -101,10 +139,7 @@ export default function BabyScreen({ navigation }) {
                  cameraButton()     
             )
         }
-    </View>
-  );
-}
-
+    </View> */}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -124,9 +159,24 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     alignItems: 'center',
   },
-  text: {
+  bigText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'white',
+    // color: 'white',
+  },
+    text: {
+    fontSize: 16,  // Adjust the size of the text as needed
+    fontWeight: 'bold',
+    color: 'black',
+    textAlign:'center'
+  },
+    circle: {
+    width: 100,  // Adjust the size of the circle as needed
+    height: 100,
+    borderRadius: 50,  // This makes the view a circle
+    backgroundColor: 'skyblue',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf:'center'
   },
 });
