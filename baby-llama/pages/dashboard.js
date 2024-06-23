@@ -3,6 +3,10 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import events from "../db/parent_events.json"
 import babyImage from '../assets/baby-placeholder.jpg'
 import background from '../assets/dash-back.png'
+import story1 from '../assets/story-1.png'
+import story2 from '../assets/story-2.png'
+
+
 const Box = ({ isPlus }) => {
   return (
     <View style={styles.box}>
@@ -45,8 +49,17 @@ export default function DashboardScreen({ navigation }) {
             <ScrollView horizontal contentContainerStyle={styles.horizontalScrollView}
         showsHorizontalScrollIndicator={true}>
                 <Box isPlus />
+                <View style={styles.box}>
+                  <ImageBackground source={story1} style={styles.smallBackground}/>
+                  </View>
+                <View style={styles.box}>
+      <ImageBackground source={story2} style={styles.smallBackground}/>
+            </View>
+                            <View style={styles.box}>
+                  <ImageBackground source={story1} style={styles.smallBackground}/>
+                  </View>
                 {[...Array(10)].map((_, index) => (
-                <Box key={index} />
+                <Box key={index}/>
                 ))}
             </ScrollView>
         </View>
@@ -164,7 +177,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     },
     horizontalScrollViewContainer: {
-    height: 80, // Adjust the height as needed
+    height: 150, // Adjust the height as needed
     justifyContent: 'center',
   },
     horizontalScrollView: {
@@ -173,12 +186,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     },
     box: {
-    width: 50,
-    height: 50,
+    width: 100,
+    height: 125,
     marginHorizontal: 5,
     backgroundColor: '#ddd',
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius:20
   },
   plusText: {
     fontSize: 24,
@@ -188,6 +202,11 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: 'cover', // or 'stretch'
     justifyContent: 'center',
+    minHeight:150
     
   },
+  smallBackground:{
+    width: '100%',
+   height:'100%' 
+  }
 });
