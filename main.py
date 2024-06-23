@@ -377,27 +377,6 @@ def get_ip_address():
     return ip
 
 
-"""
-@app.route('/upload-amazing', methods=['POST'])
-def upload_audio():
-    if 'audio' not in request.files:
-        return jsonify({'message': 'No audio file provided'}), 400
-
-    audiofile = request.files['audio']
-    if audiofile.filename == '':
-        return jsonify({'message': 'No selected file'}), 400
-
-    if audiofile:
-        filename = secure_filename(audiofile.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        audiofile.save(filepath)
-        return jsonify({
-            'message': 'Audio processed successfully',
-            'audioFile': filename
-        })
-
-"""
-
 if __name__ == '__main__':
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
