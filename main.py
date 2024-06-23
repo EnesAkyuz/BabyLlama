@@ -308,13 +308,8 @@ def upload_audio():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         audiofile.save(filepath)
 
-        # change filetype
-        audio_segment = AudioSegment.from_file(filepath)
-        wav_filepath = os.path.splitext(filepath)[0] + '.wav'
-        audio_segment.export(wav_filepath, format='wav')
-
         # transcribe with whisper
-        audio_file = open(wav_filepath, "rb")
+        audio_file = open(filepath, "rb")
         transcript = client.audio.transcriptions.create(
             model="whisper-1",
             file=audio_file
