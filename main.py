@@ -256,7 +256,7 @@ from pathlib import Path
 app = Flask(__name__)
 CORS(app)
 
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = 'baby-llama/assets/'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Initialize the OpenAI client and chat history
@@ -309,6 +309,8 @@ def upload_audio():
     if audiofile:
         filename = secure_filename(audiofile.filename)
         filepath = os.path.join(os.getcwd(),app.config['UPLOAD_FOLDER'], filename)
+        print(app.config['UPLOAD_FOLDER'])
+        print(filepath)
         audiofile.save(filepath)
 
         # transcribe with whisper
@@ -338,10 +340,10 @@ def upload_audio():
         processed_text = response
 
 
-        # Define the outputs directory path
-        outputs_dir = Path(__file__).parent / "outputs"
+        # # Define the outputs directory path
+        outputs_dir = Path(__file__).parent / "baby-llama/assets"
 
-        # Create the outputs directory if it doesn't exist
+        # # Create the outputs directory if it doesn't exist
         outputs_dir.mkdir(parents=True, exist_ok=True)
 
         # Define the output file path for speech.mp3
@@ -357,6 +359,10 @@ def upload_audio():
         with speech_file_path.open('wb') as f:
             for chunk in response.iter_bytes():
                 f.write(chunk)
+        
+        sound = AudioSegment.from_file(filepath)
+        louder_sound = sound + 100  # Increase volume by 10 dB
+        louder_sound.export(filepath, format="mp3")
         
         print(str(speech_file_path))
         return jsonify({

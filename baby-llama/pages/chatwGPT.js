@@ -10,6 +10,8 @@ import cry from '../assets/cry.png';
 import emergency from '../assets/emergency.png';
 import journal from '../assets/journal.png';
 import symptoms from '../assets/symptoms.png';
+import * as FileSystem from 'expo-file-system';
+import { Asset } from 'expo-asset';
 
 
 const ChatScreen = () => {
@@ -18,6 +20,7 @@ const ChatScreen = () => {
   const [recordingUri, setRecordingUri] = useState(null);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sound, setSound] = useState();
 
   useEffect(() => {
     (async () => {
@@ -71,11 +74,15 @@ const ChatScreen = () => {
   }
 
   const uploadRecording = async (uri) => {
+    const uriParts = uri.split('.');
+    const fileType = uriParts[uriParts.length - 1];
+    console.log(fileType)
+    console.log(uri)
     const formData = new FormData();
     formData.append("audio", {
       uri,
-      type: `audio.m4a`,
-      name: 'recording.m4a',
+      type: `audio.${fileType}`,
+      name: `audio.${fileType}`,
     }
     )
     try {
@@ -95,7 +102,7 @@ const ChatScreen = () => {
       // }
       console.log(response)
       const userMessage={type:'user', content:response.userInput}
-      const newMessage = { type: 'bot', content: response.processedText }
+      const newMessage = { type: 'bot', content: response.processedText, audioVer:response.audioFile }
       setMessages([...messages, userMessage,newMessage])
     } catch (error) {
       console.error('Failed to upload file or get response', error);
@@ -135,6 +142,56 @@ const ChatScreen = () => {
     )
   }
 
+   async function playSound() {
+//     const sourceFilePath='C:/Users/UserHome/Desktop/UCB hackathon/BabyLlama/outputs/speech.mp3'
+//  // Destination directory in the device's cache directory
+//     const cacheDirectory = FileSystem.cacheDirectory + 'audio.mp3';
+
+//     // Get the absolute path for the source file
+//     const absoluteSourcePath = sourceFilePath;
+//     // Copy the file from the source to the destination
+//     await FileSystem.copyAsync({
+//       from: absoluteSourcePath,
+//       to: cacheDirectory,
+//     });
+
+//      const { sound } = await Audio.Sound.createAsync({ uri: cacheDirectory })
+//       setSound(sound);
+//       console.log('Playing Sound');
+     //       await sound.playAsync();
+     try {
+    // Load the MP3 file from assets (adjust the path as per your project structure)
+    const asset = Asset.fromModule(require('../assets/speech.mp3'));
+    await asset.downloadAsync();
+
+    // Get the local URI of the downloaded asset
+    const localUri = asset.localUri;
+
+    // Now you can play the audio
+    const { sound } = await Audio.Sound.createAsync(
+      { uri: localUri },
+      { shouldPlay: true }
+    );
+    // Optionally, set the sound to state or a variable for further control
+    setSound(sound);
+
+    // await sound.setVolumeAsync(1.0)
+    // Play the sound
+    await sound.playAsync();
+
+  } catch (error) {
+    console.error('Error playing local audio:', error);
+  }
+  }
+  // useEffect(() => {
+  //   return sound
+  //     ? () => {
+  //         console.log('Unloading Sound');
+  //         sound.unloadAsync();
+  //       }
+  //     : undefined;
+  // }, [sound]);
+
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground
@@ -152,6 +209,9 @@ const ChatScreen = () => {
       keyExtractor={(item, index) => index.toString()}
       renderItem={({ item }) => (
         <View style={[styles.message, item.type === 'user' ? styles.userMessage : styles.botMessage]}>
+          {item.audioVer &&       <Button title="Play Sound" onPress={playSound} />
+            // (<TouchableOpacity onPress={() => playAudio(item.audioVer)}> <MaterialCommunityIcons name='play' size={40} /> </TouchableOpacity>)
+          }
           <Text>{item.content}</Text>
         </View>
       )}

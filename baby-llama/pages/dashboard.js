@@ -1,7 +1,8 @@
-import { View, Image, Text, SafeAreaView, TouchableOpacity, StyleSheet, ScrollView} from 'react-native';
+import { View, Image, Text, SafeAreaView, TouchableOpacity, StyleSheet, ScrollView, ImageBackground} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import events from "../db/parent_events.json"
 import babyImage from '../assets/baby-placeholder.jpg'
+import background from '../assets/dash-back.png'
 const Box = ({ isPlus }) => {
   return (
     <View style={styles.box}>
@@ -12,7 +13,8 @@ const Box = ({ isPlus }) => {
 export default function DashboardScreen({ navigation }) {
     const tasks=[{id:1, description:'play with baby', completed:false}, {id:2, description:'feed baby', completed:false}]
     return (
-        <SafeAreaView style={{flex:1}}>
+      <SafeAreaView style={{ flex: 1, backgroundColor:'white' }}>
+        <ImageBackground source={background} style={styles.background}>
             <View style={{flexDirection:'row',  alignItems: 'center',justifyContent: 'flex-end',paddingHorizontal: 10}}>
           <TouchableOpacity style={{ flex: 1, paddingVertical: 10, paddingHorizontal: 10 }}></TouchableOpacity>
           <TouchableOpacity style={{ flex: 0, paddingVertical: 10, paddingHorizontal: 10 }} onPress={()=>navigation.navigate('Notifications')}>
@@ -35,7 +37,10 @@ export default function DashboardScreen({ navigation }) {
             </View>
             
           </View>
+          
           </View>
+         </ImageBackground>
+        
             <View style={styles.horizontalScrollViewContainer}>
             <ScrollView horizontal contentContainerStyle={styles.horizontalScrollView}
         showsHorizontalScrollIndicator={true}>
@@ -79,6 +84,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor:'white',
   },
   circle: {
     width: 100,  // Adjust the size of the circle as needed
@@ -167,5 +173,11 @@ const styles = StyleSheet.create({
   plusText: {
     fontSize: 24,
     fontWeight: 'bold',
+  },
+    background: {
+    flex: 1,
+    resizeMode: 'cover', // or 'stretch'
+    justifyContent: 'center',
+    
   },
 });
