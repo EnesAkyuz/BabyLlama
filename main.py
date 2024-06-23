@@ -247,7 +247,11 @@ from werkzeug.utils import secure_filename
 
 # openai dependencies
 import sys
-from openai import OpenAI, AsyncOpenAI
+from openai import OpenAI, AsyncOpenAI, audio
+
+# audio stuff
+from pydub import AudioSegment
+from pathlib import Path
 
 app = Flask(__name__)
 CORS(app)
@@ -259,7 +263,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 chat_history = []
 client = OpenAI()
 MODEL = 'gpt-3.5-turbo'
-
 
 @app.route('/upload-text', methods=['POST'])
 def upload_text():
@@ -296,18 +299,56 @@ def upload_audio():
     if 'audio' not in request.files:
         return jsonify({'message': 'No audio file provided'}), 400
 
-    audio = request.files['audio']
-    if audio.filename == '':
+    audiofile = request.files['audio']
+    if audiofile.filename == '':
         return jsonify({'message': 'No selected file'}), 400
 
-    if audio:
-        filename = secure_filename(audio.filename)
+    if audiofile:
+        filename = secure_filename(audiofile.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        audio.save(filepath)
+        audiofile.save(filepath)
+
+        # transcribe with whisper
+        audio_file = open(filepath, "rb")
+        transcript = client.audio.transcriptions.create(
+            model="whisper-1",
+            file=audio_file
+        )
+        text = transcript["text"]
+
+        speech_file_path = Path(__file__).parent / "speech.mp3"
+        response = audio.speech.create(
+            model="tts-1",
+            voice="alloy",
+            input=text
+        )
+        response.stream_to_file(speech_file_path)
+
+        return jsonify({
+            'message': 'Audio processed successfully',
+            'audioFile': speech_file_path
+        })
+
+
+@app.route('/upload-audio2', methods=['POST'])
+def upload_audio():
+    if 'audio' not in request.files:
+        return jsonify({'message': 'No audio file provided'}), 400
+
+    audiofile = request.files['audio']
+    if audiofile.filename == '':
+        return jsonify({'message': 'No selected file'}), 400
+
+    if audiofile:
+        filename = secure_filename(audiofile.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        audiofile.save(filepath)
         return jsonify({
             'message': 'Audio processed successfully',
             'audioFile': filename
         })
+
+
 
 if __name__ == '__main__':
     if not os.path.exists(UPLOAD_FOLDER):
