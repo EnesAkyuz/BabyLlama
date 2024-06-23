@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, TextInput, Image, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator,ImageBackground } from 'react-native';
+import { View, Text, Button, TextInput, Image, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator,ImageBackground, Linking } from 'react-native';
 import { Audio } from 'expo-av';
 import ky from 'ky';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -160,9 +160,13 @@ const ChatScreen = () => {
     try {
       const response = await axios.post("http://10.56.193.152:5000/you-com-call", );
       const userMessage={type:'user', content:"Articles about parenthood and children!"}
-      const results = response.data.slice(0,5)
-      const formattedList = results.map(item => `- ${item.title} via ${item.url}`).join('\n');
-      const newMessage = { type:'bot',content: formattedList }
+      const results = response.data.slice(0, 5)
+      // print(response.data)
+      // console.log(results)
+
+      // const formattedList = results.map(item => `- ${item.title} via ${item.url}`).join('\n\n');
+      const newMessage = { type: 'bot', content: results, links: true }
+      console.log(newMessage)
       setMessages([...messages, userMessage, newMessage])
     } catch (error) {
       console.error('Failed to upload file or get response', error);
@@ -178,7 +182,9 @@ const ChatScreen = () => {
   //       }
   //     : undefined;
   // }, [sound]);
-
+  const handleLink = (url) => {
+    Linking.openURL(url).catch(err => console.error('An error occurred', err));
+  };
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground
@@ -199,7 +205,17 @@ const ChatScreen = () => {
           {item.audioVer &&       <Button title="Play Sound" onPress={playSound} />
             // (<TouchableOpacity onPress={() => playAudio(item.audioVer)}> <MaterialCommunityIcons name='play' size={40} /> </TouchableOpacity>)
           }
-          <Text>{item.content}</Text>
+          {!item.links ?
+            <Text>{item.content}</Text>
+            :
+            item.content.map((article, index) => {
+              return(
+              <TouchableOpacity key={index} onPress={() => handleLink(article.url)}>
+              <Text style={{color:'blue', fontWeight:700, marginBottom:5}}>{`${index + 1}. ${article.title}`}</Text>
+            </TouchableOpacity>)
+          })
+          }
+          
         </View>
       )}
             />

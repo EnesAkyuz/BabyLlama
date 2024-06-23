@@ -8,7 +8,7 @@ import background from '../assets/background.png';
 import predictions from '../assets/predictions.json'
 
 const ChatScreenYou = () => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState();
   const [recording, setRecording] = useState(null);
   const [recordingUri, setRecordingUri] = useState(null);
   const [input, setInput] = useState("");
@@ -91,7 +91,7 @@ const ChatScreenYou = () => {
     if (results) {
       results.sort((a, b) => b.score - a.score)
       const top5Emotion = results.slice(0, 5)
-      const top5String = top5Emotion.map((item, index) => `${index + 1}. ${item.name}, Score: ${item.score}`).join('\n');
+      const top5String = top5Emotion.map((item, index) => `${index + 1}. ${item.name}, Score: ${item.score.toFixed(3)}`).join('\n');
       setMessages(top5String)
       setSent(true);
     } else {
@@ -105,12 +105,13 @@ const ChatScreenYou = () => {
         source={background}
         style={styles.background}
       >
-      {loading ? <View style={{ justifyContent: 'center', flex: 1 }}>
-        <ActivityIndicator size='large' />
+        {loading ? <View style={{ justifyContent: 'center', flex: 1 }}>
+          <ActivityIndicator size='large' />
         </View>
-          : 
+          :
+           messages &&
           <View style={{ backgroundColor: 'white', borderRadius: 10, padding: 20 }}>
-            <Text style={{fontSize:20, fontVariant:'bold', fontWeight:700, marginBottom:10}}>Your mood details</Text>
+            <Text style={{ fontSize: 20, fontVariant: 'bold', fontWeight: 700, marginBottom: 10 }}>Your mood details</Text>
             <Text>{messages}</Text>
           </View>
         }
