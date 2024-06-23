@@ -357,10 +357,13 @@ def upload_audio():
         with speech_file_path.open('wb') as f:
             for chunk in response.iter_bytes():
                 f.write(chunk)
-
+        
+        print(str(speech_file_path))
         return jsonify({
             'message': 'Audio processed successfully',
-            'audioFile': str(speech_file_path)
+            'processedText':str(chat_history[-1]['content']),
+            'audioFile': str(speech_file_path),
+            'userInput':str(chat_history[-2]['content'])
         })
 
 def get_ip_address():

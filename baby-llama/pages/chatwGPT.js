@@ -57,7 +57,7 @@ const ChatScreen = () => {
     const formData = new FormData();
     formData.append("text", input)
     try {
-      const response = await axios.post("http://10.56.133.7:5000/upload-text", { text: input });
+      const response = await axios.post("http://10.56.193.152:5000/upload-text", { text: input });
       const userMessage={type:'user', content:input}
       console.log(response.data.processedText)
       const newMessage = { type:'bot',content: response.data.processedText }
@@ -79,20 +79,24 @@ const ChatScreen = () => {
     }
     )
     try {
-      const response= await ky.post("http://10.56.133.7:5000/upload-audio", {
+      const response= await ky.post("http://10.56.193.152:5000/upload-audio", {
       body: formData,
-    });
-      if (!response.ok) {
-        throw new Error('Failed to upload file');
-      }
+    }).json();
+      // if (!response.ok) {
+      //   throw new Error('Failed to upload file');
+      // }
 
       // const data = await response;
-      console.log('Server response:', response);
+      // console.log('Server response:', response.data);
       // if (response.status === 200) {
       //   console.log("success")
       //   // const chatResponse = await axios.get('http://127.0.0.1:5000/get-response');
       //   // setMessages([...messages, { type: 'user', content: 'Audio message' }, { type: 'bot', content: chatResponse.data.message }]);
       // }
+      console.log(response)
+      const userMessage={type:'user', content:response.userInput}
+      const newMessage = { type: 'bot', content: response.processedText }
+      setMessages([...messages, userMessage,newMessage])
     } catch (error) {
       console.error('Failed to upload file or get response', error);
     }
@@ -199,7 +203,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
   botMessage: {
-    backgroundColor: 'lightgray',
+    backgroundColor: 'white',
     alignSelf: 'flex-start',
   },
   recordButton: {
