@@ -238,7 +238,7 @@ if __name__ == "__main__":
     CORS(app)  # Enables CORS for all domains, adjust as necessary for production
     app.run(debug=True, port=5000)
 """
-
+import socket
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
@@ -308,7 +308,7 @@ def upload_audio():
 
     if audiofile:
         filename = secure_filename(audiofile.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        filepath = os.path.join(os.getcwd(),app.config['UPLOAD_FOLDER'], filename)
         audiofile.save(filepath)
 
         # transcribe with whisper
@@ -317,44 +317,69 @@ def upload_audio():
             model="whisper-1",
             file=audio_file
         )
-        text = transcript["text"]
+        text = transcript.text
 
-        speech_file_path = Path(__file__).parent / "speech.mp3"
+        # Add user's message to chat history
+        chat_history.append({"role": "user", "content": text})
+
+        stream = client.chat.completions.create(
+            model=MODEL,
+            messages=chat_history,
+            stream=True,
+        )
+
+        response = ''
+        for chunk in stream:
+            if chunk.choices[0].delta.content is not None:
+                response += chunk.choices[0].delta.content
+
+        # Add GPT's response to chat history
+        chat_history.append({"role": "assistant", "content": response})
+        processed_text = response
+
+
+        # Define the outputs directory path
+        outputs_dir = Path(__file__).parent / "outputs"
+
+        # Create the outputs directory if it doesn't exist
+        outputs_dir.mkdir(parents=True, exist_ok=True)
+
+        # Define the output file path for speech.mp3
+        speech_file_path = outputs_dir / "speech.mp3"
+
         response = audio.speech.create(
             model="tts-1",
             voice="alloy",
-            input=text
+            input=processed_text,
         )
-        response.stream_to_file(speech_file_path)
+
+        # Write the response content to a file
+        with speech_file_path.open('wb') as f:
+            for chunk in response.iter_bytes():
+                f.write(chunk)
 
         return jsonify({
             'message': 'Audio processed successfully',
-            'audioFile': speech_file_path
+            'audioFile': str(speech_file_path)
         })
 
+def get_ip_address():
+    """Find the local IP address of the machine."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.254.254.254', 1))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = '127.0.0.1'
+    finally:
+        s.close()
+    return ip
 
-"""
-@app.route('/upload-amazing', methods=['POST'])
-def upload_audio():
-    if 'audio' not in request.files:
-        return jsonify({'message': 'No audio file provided'}), 400
-
-    audiofile = request.files['audio']
-    if audiofile.filename == '':
-        return jsonify({'message': 'No selected file'}), 400
-
-    if audiofile:
-        filename = secure_filename(audiofile.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        audiofile.save(filepath)
-        return jsonify({
-            'message': 'Audio processed successfully',
-            'audioFile': filename
-        })
-
-"""
 
 if __name__ == '__main__':
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
-    app.run(debug=True)
+    ip_address = get_ip_address()
+    print(f"Running Flask server on IP address: {ip_address}")
+    app.run(debug=True, host=ip_address, port=5000)
