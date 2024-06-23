@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, TextInput, FlatList, StyleSheet } from 'react-native';
+import { View, Text, Button, TextInput, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { Audio } from 'expo-av';
 import ky from 'ky';
-
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import axios from 'axios';
 
 const ChatScreen = () => {
   const [messages, setMessages] = useState([]);
   const [recording, setRecording] = useState(null);
   const [recordingUri, setRecordingUri] = useState(null);
+  const [input, setInput] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -42,6 +44,18 @@ const ChatScreen = () => {
     uploadRecording(uri);
   };
 
+  const uploadText = async () => {
+    const formData = new FormData();
+    formData.append("text", input)
+    try {
+      const response = await axios.post("http://10.56.193.152:5000/upload-text", { text: input });
+      // console.log(response["processedText"])
+      console.log(response.data.processedText)
+    } catch (error) {
+      console.error('Failed to upload file or get response', error);
+    }
+  }
+
   const uploadRecording = async (uri) => {
     const formData = new FormData();
     formData.append("audio", {
@@ -60,6 +74,7 @@ const ChatScreen = () => {
 
       const data = await response.json();
       console.log('Server response:', data);
+      setInput("");
       // if (response.status === 200) {
       //   console.log("success")
       //   // const chatResponse = await axios.get('http://127.0.0.1:5000/get-response');
@@ -81,11 +96,29 @@ const ChatScreen = () => {
           </View>
         )}
       />
-      <Button
+      {/* <Button
         title={recording ? 'Stop Recording' : 'Start Recording'}
         onPress={recording ? stopRecording : startRecording}
-        style={styles.recordButton}
-      />
+        style={styles.recordButton}>
+      < MaterialCommunityIcons name='microphone' size={30} color={'black'} />
+      </Button> */}
+
+       <View style={{flexDirection:'row',  alignItems: 'center',justifyContent: 'flex-end',paddingHorizontal: 10, gap:20}}>
+        <TextInput
+          value={input}
+          onChangeText={setInput}
+          placeholder="Your question"
+          style={styles.inputText} />
+        {input.length===0?
+          <TouchableOpacity style={styles.recordButton} onPress={recording ? stopRecording : startRecording}>
+          < MaterialCommunityIcons name='microphone' size={40} color={'black'} />
+          </TouchableOpacity>
+          : <TouchableOpacity style={styles.recordButton} onPress={()=>uploadText()}>
+              < MaterialCommunityIcons name='send' size={40} color={'black'} />
+        </TouchableOpacity>
+        }
+        
+        </View>
     </View>
   );
 };
@@ -110,11 +143,24 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   recordButton: {
-    position: 'absolute',
+    // position: 'absolute',
     bottom: 10,
-    left: '50%',
-    // transform: [{ translateX: -50% }]
-  },
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderRadius: 40,
+    flex:0
+  }, 
+  inputText: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 10, 
+    fontSize: 20,
+    borderWidth: 1,
+    bottom: 10, 
+    borderRadius:40,
+    // position:'absolute'
+  }
 });
 
 export default ChatScreen;
