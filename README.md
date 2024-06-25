@@ -15,6 +15,10 @@
     <img src="https://github.com/EnesAkyuz/BabyLlama/assets/90750587/b98967b0-e9e5-4564-8061-0e141f3d0f79" alt="Final Logo" width="200">
 </p>
 
+##### Additional links
+- [Video Walkthrough](https://www.youtube.com/watch?v=c_Dx4sdCstA&ab_channel=Eyl%C3%BClY%C4%B1ld%C4%B1r%C4%B1m)
+
+- [Devpost link](https://devpost.com/software/babyllama)
 
 ### What it does
 The mobile application has multiple features ranging from menial tasks to AI-supported creative tasks:
